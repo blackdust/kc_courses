@@ -39,6 +39,8 @@ module KcCourses
 
     field :name, :type => String
     field :desc, :type => String
+    field :favorited_count, :type => Integer
+    after_create :set_favorited_count_zero
 
     belongs_to :creator, class_name: 'User'
     belongs_to :cover_file_entity, class_name: 'FilePartUpload::FileEntity'
@@ -51,6 +53,11 @@ module KcCourses
 
     def cover(version=nil)
       (cover_file_entity and cover_file_entity.url(version)) || ENV['course_default_cover_url']
+    end
+
+    def set_favorited_count_zero
+      self.favorited_count = 0
+      self.save
     end
   end
 end

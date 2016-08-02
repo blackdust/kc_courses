@@ -8,7 +8,13 @@ module KcCourses
         require_dependency(c)
       end
 
+
       User.class_eval do
+        # class << self
+        #   def favorite_courses_count(course)
+        #   end
+        # end
+
         has_many :courses, class_name: 'KcCourses::Course'
         has_many :chapters, class_name: 'KcCourses::Chapter'
         has_many :wares, class_name: 'KcCourses::Ware'
@@ -20,15 +26,20 @@ module KcCourses
         define_method :set_favorite_course do |course|
           unless self.favorites.where(course: course).any?
             self.favorites.create course: course
+            course.favorited_count += 1
+            course.save
           end
         end
 
         define_method :cancel_favorite_course do |course|
-          self.favorites.where(course: course).destroy_all > 0 ? true : false
+          if self.favorites.where(course: course).destroy_all > 0 
+            course.favorited_count -= 1
+            course.save
+          end
         end
 
         define_method :favorite_courses do |&block|
-          self.favorites.map{|x| x.course}
+          self.favorites.map{|x| x.course}.compact
         end
 
 
